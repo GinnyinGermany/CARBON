@@ -40,7 +40,10 @@ def generate_svg_line_sparkline(series: pd.Series) -> str:
 # -----------------------------------------------------------------------------
 # Analysis Function 1: Table - Emission share, Emission Growth Rate
 # -----------------------------------------------------------------------------
-def generate_sectoral_emissions_table(sector_emission_dataframe: pd.DataFrame, start_year: int = 2000, end_year: int = 2023, top_n: int = 9) -> str:
+def generate_sectoral_emissions_table(sector_emission_dataframe: pd.DataFrame,
+                                      start_year: int = 2000,
+                                      end_year: int = 2023,
+                                      top_n: int = 9) -> str:
     """
     Processes sectors to identify Top N, Grouping the others for compact visualizing.
     Includes Sector Codes, Decreasing/Increasing arrows, and Trend line sparklines.

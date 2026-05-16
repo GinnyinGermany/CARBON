@@ -3,7 +3,12 @@ import numpy as np
 import pandas as pd
 
 
-def calculate_adjusted_carbon_budgets(merged_global, target_budget, hist_start=1970, hist_end=2023, future_start=2024, future_end=2050):
+def calculate_adjusted_carbon_budgets(merged_global: pd.DataFrame,
+                                      target_budget: float,
+                                      hist_start: int = 1970,
+                                      hist_end: int = 2023,
+                                      future_start: int = 2024,
+                                      future_end: int = 2050) -> pd.DataFrame:
     """
     Calculates the historical carbon debt, fair share of remaining budget,
     and the final adjusted carbon budget for each country.
@@ -88,7 +93,10 @@ def calculate_adjusted_carbon_budgets(merged_global, target_budget, hist_start=1
     return final_budget_df
 
 
-def plot_germany_carbon_analysis(final_budget_df, merged_global, total_em, temp):
+def plot_germany_carbon_analysis(final_budget_df: pd.DataFrame,
+                                 merged_global: pd.DataFrame,
+                                 total_em: pd.DataFrame,
+                                 temp: str) -> None:
     """
     Visualizes Germany's carbon budget status with a publication-ready single plot.
     Historical data is sourced directly from total_em.

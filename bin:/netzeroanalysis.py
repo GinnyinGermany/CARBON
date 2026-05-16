@@ -1,8 +1,12 @@
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-def analyze_policy_pathway(result_15, result_20, total_em, e_1990_gt):
+def analyze_policy_pathway(result_15: pd.DataFrame,
+                           result_20: pd.DataFrame,
+                           total_em: pd.DataFrame,
+                           e_1990_gt: float) -> None:
     # 1. Extract Historical Data
     e_2023 = total_em[total_em['year'] == 2023]['emission'].iloc[0] / 1e9
 

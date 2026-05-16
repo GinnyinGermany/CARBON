@@ -88,21 +88,6 @@ def calculate_adjusted_carbon_budgets(merged_global, target_budget, hist_start=1
     return final_budget_df
 
 
-# ---------------------------------------------------------
-# Set Academic Paper Style (Global Parameters)
-# ---------------------------------------------------------
-plt.rcParams.update({
-    'font.family': 'sans-serif',          # Use serif font for academic look (e.g., Times New Roman style)
-    'font.sans-serif': ['Arial', 'Helvetica', 'DejaVu Sans'],
-    'axes.spines.top': False,        # Remove top border
-    'axes.spines.right': False,      # Remove right border
-    'axes.grid': False,              # Remove grid lines completely
-    'legend.frameon': False,         # Remove box around the legend
-    'figure.dpi': 300,               # High resolution for publication/export
-    'figure.autolayout': True        # Equivalent to tight_layout
-})
-
-
 def plot_germany_carbon_analysis(final_budget_df, merged_global, total_em, temp):
     """
     Visualizes Germany's carbon budget status with a publication-ready single plot.

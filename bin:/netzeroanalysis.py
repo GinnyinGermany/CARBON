@@ -1,18 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# ---------------------------------------------------------
-# Set Modern Academic/Consulting Style
-# ---------------------------------------------------------
-plt.rcParams.update({
-    'font.family': 'sans-serif',
-    'font.sans-serif': ['Arial', 'Helvetica', 'DejaVu Sans'],
-    'axes.spines.top': False,
-    'axes.spines.right': False,
-    'axes.grid': False,
-    'figure.dpi': 300
-})
-
 
 def analyze_policy_pathway(result_15, result_20, total_em, e_1990_gt):
     # 1. Extract Historical Data

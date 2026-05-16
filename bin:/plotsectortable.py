@@ -1,12 +1,10 @@
 import pandas as pd
 
 
-# -----------------------------------------------------------------------------
-# Helper Function: Create SVG Line Sparklines for Trend Visualization
-# -----------------------------------------------------------------------------
-def generate_svg_line_sparkline(series: pd.Series) -> str:
+def generate_sparkline(series: pd.Series) -> str:
     """
-    Converts a time-series of numeric values into a line chart.
+    Converts a time-series of numeric values into a line chart
+    and creates sparklines for trend visualization.
     """
     data = series.dropna().tolist()
     if not data:
@@ -37,20 +35,25 @@ def generate_svg_line_sparkline(series: pd.Series) -> str:
     return f'<svg width="{width}" height="{height}"><polyline points="{pts_str}" fill="none" stroke="#555555" stroke-width="2" stroke-linejoin="round"/></svg>'
 
 
-# -----------------------------------------------------------------------------
-# Analysis Function 1: Table - Emission share, Emission Growth Rate
-# -----------------------------------------------------------------------------
-def generate_sectoral_emissions_table(sector_emission_dataframe: pd.DataFrame,
+def generate_sectoral_emissions_table(sector_emission: pd.DataFrame,
                                       start_year: int = 2000,
                                       end_year: int = 2023,
                                       top_n: int = 9) -> str:
     """
-    Processes sectors to identify Top N, Grouping the others for compact visualizing.
-    Includes Sector Codes, Decreasing/Increasing arrows, and Trend line sparklines.
-    Returns HTML table.
+    Analyzes sectoral emission profiles across a specific timeframe to identify top polluters,
+    calculate cumulative shares and growth rates, and generate an aggregated HTML summary table.
+
+    Args:
+        sector_emission (pd.DataFrame): Sectoral dataset containing 'year', 'sector_code', 'sector_name', and 'emission'.
+        start_year (int): Start year for filtering the emission timeframe. Default is 2000.
+        end_year (int): End year for filtering the emission timeframe. Default is 2023.
+        top_n (int): Number of top individual sectors to distinctively display. Default is 9.
+
+    Returns:
+        str: A styled HTML table containing cumulative shares, embedded sparkline trends, and growth indicators.
     """
     # 1. Filter timeframe
-    df_filtered = sector_emission_dataframe[(sector_emission_dataframe['year'] >= start_year) & (sector_emission_dataframe['year'] <= end_year)].copy()
+    df_filtered = sector_emission[(sector_emission['year'] >= start_year) & (sector_emission['year'] <= end_year)].copy()
 
     # 2. Pivot data incorporating BOTH Sector Code and Sector Name
     pivot_df = df_filtered.pivot_table(
@@ -89,10 +92,11 @@ def generate_sectoral_emissions_table(sector_emission_dataframe: pd.DataFrame,
     )
 
     # 8. Apply Sparklines
-    final_df['Trend (2000-2023)'] = final_df.loc[:, start_year:end_year].apply(generate_svg_line_sparkline, axis=1)
+    title = f'Trend ({start_year}-{end_year})'
+    final_df[title] = final_df.loc[:, start_year:end_year].apply(generate_sparkline, axis=1)
 
     # 9. Clean up layout
-    result_columns = ['Cumulative Share (%)', 'Trend (2000-2023)', 'Direction', 'Growth Rate (%)']
+    result_columns = ['Cumulative Share (%)', title, 'Direction', 'Growth Rate (%)']
     result_table = final_df[result_columns].copy()
     result_table.columns.name = None
 

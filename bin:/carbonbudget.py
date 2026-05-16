@@ -67,7 +67,7 @@ def calculate_adjusted_carbon_budgets(merged_global: pd.DataFrame,
     # 3. Calculate Final Adjusted Remaining Budget
     # =====================================================================
     # Merge the historical (Debt) and future (Fair Share) dataframes
-    final_budget_df = pd.merge(
+    global_carbon_budget = pd.merge(
         country_hist[['country_code', 'debt']],
         country_future[['country_code', 'fair_share']],
         on='country_code',
@@ -75,40 +75,40 @@ def calculate_adjusted_carbon_budgets(merged_global: pd.DataFrame,
     )
 
     # Adjusted Budget = Fair Share - Debt
-    final_budget_df['adjusted_budget'] = final_budget_df['fair_share'] - final_budget_df['debt']
+    global_carbon_budget['adjusted_budget'] = global_carbon_budget['fair_share'] - global_carbon_budget['debt']
 
     # Extract unique country codes and names from the original merged_global dataframe
     country_mapping = merged_global[['country_code', 'country_name_em']].drop_duplicates(subset=['country_code'], keep='first')
 
     # Merge the country names into the final budget dataframe
-    final_budget_df = pd.merge(final_budget_df, country_mapping, on='country_code', how='left')
+    global_carbon_budget = pd.merge(global_carbon_budget, country_mapping, on='country_code', how='left')
 
     # Reorder columns to put the country name first for better readability
-    final_budget_df = final_budget_df[['country_name_em', 'country_code', 'debt', 'fair_share', 'adjusted_budget']]
+    global_carbon_budget = global_carbon_budget[['country_name_em', 'country_code', 'debt', 'fair_share', 'adjusted_budget']]
 
     # Sort by adjusted budget to see which countries have the largest deficits or surpluses
-    final_budget_df = final_budget_df.sort_values(by='adjusted_budget', ascending=True)
+    global_carbon_budget = global_carbon_budget.sort_values(by='adjusted_budget', ascending=True)
 
     # Return the final dataframe instead of printing
-    return final_budget_df
+    return global_carbon_budget
 
 
-def plot_germany_carbon_analysis(final_budget_df: pd.DataFrame,
-                                 merged_global: pd.DataFrame,
-                                 total_em: pd.DataFrame,
-                                 temp: str) -> None:
+def plot_germany_carbon_analysis(global_carbon_budget: pd.DataFrame,
+                                 global_emission_population: pd.DataFrame,
+                                 country_emission: pd.DataFrame,
+                                 temperature: str) -> None:
     """
     Visualizes Germany's carbon budget status with a publication-ready single plot.
-    Historical data is sourced directly from total_em.
+    Historical data is sourced directly from country_emission.
     """
     # 1. Data Extraction & Preparation
-    deu_budget = final_budget_df[final_budget_df['country_code'] == 'DEU'].iloc[0]
+    deu_budget = global_carbon_budget[global_carbon_budget['country_code'] == 'DEU'].iloc[0]
     fair_share_gt = deu_budget['fair_share']
 
-    emission_2023_row = total_em[total_em['year'] == 2023].iloc[0]
+    emission_2023_row = country_emission[country_emission['year'] == 2023].iloc[0]
     annual_emission_2023_gt = emission_2023_row['emission'] / 1e9
 
-    deu_pop_2024 = merged_global[(merged_global['country_code'] == 'DEU') & (merged_global['year'] == 2024)]['population'].values[0]
+    deu_pop_2024 = global_emission_population[(global_emission_population['country_code'] == 'DEU') & (global_emission_population['year'] == 2024)]['population'].values[0]
 
     avg_annual_fair_national_gt = fair_share_gt / 27
     individual_fair_allowance_total = (fair_share_gt * 1e9) / deu_pop_2024
@@ -116,29 +116,29 @@ def plot_germany_carbon_analysis(final_budget_df: pd.DataFrame,
     years_left = fair_share_gt / annual_emission_2023_gt
     depletion_date = 2023 + years_left
 
-    hist_years = total_em['year'].values
-    hist_emissions = total_em['emission'].values / 1e9
+    hist_years = country_emission['year'].values
+    hist_emissions = country_emission['emission'].values / 1e9
 
     proj_years = np.arange(2024, 2041)
     bau_emissions = np.full(len(proj_years), annual_emission_2023_gt)
     fair_line = np.full(len(proj_years), avg_annual_fair_national_gt)
 
-    # 2. Plotting (Publication Quality)
+    # 2. Plotting
     FS = 12  # Base Font Size
     fig, ax = plt.subplots(figsize=(8, 5))
 
-    # Professional Hex Color Palette (Muted tones)
-    c_hist = '#2c3e50'  # Dark Slate Gray
-    c_bau = '#c0392b'   # Muted Dark Red
-    c_fair = '#27ae60'  # Muted Green
+    # Professional Hex Color Palette
+    color_historical = '#2c3e50'  # Dark Slate Gray
+    color_bau = '#c0392b'         # Muted Dark Red
+    color_fairshare = '#27ae60'   # Muted Green
 
     # Plot Lines with adjusted thickness
-    ax.plot(hist_years, hist_emissions, color=c_hist, linewidth=2.5, label='Historical Emissions (2000-2023)')
-    ax.plot(proj_years, bau_emissions, color=c_bau, linewidth=2.5, linestyle='--', label='BAU Projection (Keep 2023 Level)')
-    ax.plot(proj_years, fair_line, color=c_fair, linewidth=2.5, label='Fair Annual Budget (Average)')
+    ax.plot(hist_years, hist_emissions, color=color_historical, linewidth=2.5, label='Historical Emissions (2000-2023)')
+    ax.plot(proj_years, bau_emissions, color=color_bau, linewidth=2.5, linestyle='--', label='BAU Projection (Keep 2023 Level)')
+    ax.plot(proj_years, fair_line, color=color_fairshare, linewidth=2.5, label='Fair Annual Budget (Average)')
 
-    # Shading the Gap (Subtle alpha)
-    ax.fill_between(proj_years, fair_line, bau_emissions, color=c_bau, alpha=0.08)
+    # Shading the Gap
+    ax.fill_between(proj_years, fair_line, bau_emissions, color=color_bau, alpha=0.08)
 
     # Draw a vertical line at the depletion date
     ax.axvline(x=depletion_date, color='purple', linestyle=':', linewidth=1.5, zorder=0)
@@ -149,7 +149,7 @@ def plot_germany_carbon_analysis(final_budget_df: pd.DataFrame,
             color='purple', fontsize=FS, fontweight='bold')
 
     # Formatting & Labels
-    ax.set_title(f'Germany: Carbon Budget Analysis ({temp}°C Scenario)', fontsize=FS+4, fontweight='bold', pad=15)
+    ax.set_title(f'Germany: Carbon Budget Analysis ({temperature}°C Scenario)', fontsize=FS+4, fontweight='bold', pad=15)
     ax.set_xlabel('Year', fontsize=FS+1)
 
     # Using Matplotlib's math text for CO2 subscript
@@ -162,9 +162,9 @@ def plot_germany_carbon_analysis(final_budget_df: pd.DataFrame,
     ax.tick_params(axis='both', labelsize=FS)
     # Add labels directly above the lines instead of a legend
     # Adjust the +0.02 (Y offset) and X coordinates to fit perfectly
-    ax.text(2008, hist_emissions[10] + 0.05, 'Historical Emissions', color=c_hist, fontsize=FS, fontweight='bold')
-    ax.text(2025, bau_emissions[1] + 0.05, 'BAU Projection', color=c_bau, fontsize=FS, fontweight='bold')
-    ax.text(2025, fair_line[1] + 0.05, 'Fair Annual Budget', color=c_fair, fontsize=FS, fontweight='bold')
+    ax.text(2008, hist_emissions[10] + 0.05, 'Historical Emissions', color=color_historical, fontsize=FS, fontweight='bold')
+    ax.text(2025, bau_emissions[1] + 0.05, 'BAU Projection', color=color_bau, fontsize=FS, fontweight='bold')
+    ax.text(2025, fair_line[1] + 0.05, 'Fair Annual Budget', color=color_fairshare, fontsize=FS, fontweight='bold')
 
     ax.spines['bottom'].set_linewidth(2.0)
     ax.spines['bottom'].set_color('black')
@@ -175,7 +175,7 @@ def plot_germany_carbon_analysis(final_budget_df: pd.DataFrame,
 
     # 3. Summary Results
     print("\n" + "="*60)
-    print(f"  ANALYSIS SUMMARY FOR GERMANY (DEU) | {temp}°C SCENARIO")
+    print(f"  ANALYSIS SUMMARY FOR GERMANY (DEU) | {temperature}°C SCENARIO")
     print("="*60)
     print(f"  ● Allocated Fair Share (2024-2050)      : {fair_share_gt:.2f} GtCO2")
     print(f"  ● Current Annual Emission (2023)        : {annual_emission_2023_gt:.2f} GtCO2")

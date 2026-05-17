@@ -1,11 +1,20 @@
 Dataset explanation : 2000-2023 Germany gas emission, metric : ton, CO2, N2O, CH4 by Economic activities
 
-Air emission - CO2, CH4, N2O are representative greenhouse gas emissions, and it is directly related with climate change. Regarding to carbon emission budget, I’d like to think about how responsible germany is about climate change, releasing the greenhouse gas emission from their industry, households, and other sources. For analysing this dataset, I can understand well about how different sectors contribute to the global warming.
+Dataset explanation : 2000-2023 Germany Greenhouse gas emissions, metric : CO2 equivalent ton(t CO2eq) by Economic activities
 
-My main interests are :  “cumulative responsibility of greenhouse gas on climate change by country”
-how much cumulative emission the germany released within around 20 years,(2000 - 2023). And how it is responsible regarding to carbon budget at a global level(or comparing to the specific country-e.g, South Korea?
-For which sector have the greenhouse gas emissions in charge most?, and how it changed by around 20 years?
-For which sector greenhouse gas emissions declined most and why? 
-For achieving the net zero 2045 plan, how stiff/ much percent the decreasing path go?
+Greenhouse gas emissions are directly related to climate change. Regarding the carbon 
+emission budget, I’d like to think about how responsible Germany is about climate change, releasing the greenhouse gas emission from their industry, households, and other sources. By analyzing this dataset, I can understand well about how responsible Germany is historically and which sectors contribute to global warming most. 
 
-data reference : https://www-genesis.destatis.de/datenbank/online/statistic/85111/table/85111-0002
+My main question is :  “cumulative responsibility of greenhouse gas on climate change by country”
+Following research questions are :
+1.  How responsible are Germany’s cumulative greenhouse gas emissions for the global carbon budget?
+2. How many years are left before Germany’s carbon budgets are exhausted under business-as-usual emissions?
+3. How many years are left before Germany’s carbon budgets are exhausted under 2045 carbon-neutral pathway?
+4. How have greenhouse gas emissions changed across sectors, and which sector has been the most prominent contributor over the past 20 years?
+
+
+Methods : Calculating and plotting carbon debt by country, Ranking the sectoral emissions data and plotting in table, Calculating years left and plotting the emission reduction pathway
+
+Possible pakcages/functions : pandas, numpy, matplotlib, plotly.express and I would make indenpendent function files for keeping jupyter notebook tidy.
+
+

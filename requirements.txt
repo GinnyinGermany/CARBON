@@ -1,0 +1,8 @@
+matplotlib
+numpy
+pandas
+plotly
+ipython
+flake8
+ipykernel
+nbformat

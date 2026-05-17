@@ -3,7 +3,120 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def analyze_german_policy_pathway(global_carbon_budget_1_5C: pd.DataFrame,
+def analyze_german_bau_pathway(global_carbon_budget: pd.DataFrame,
+                                 global_emission_population: pd.DataFrame,
+                                 country_emission: pd.DataFrame,
+                                 temperature: str) -> None:
+    """
+    Evaluates Germany's Business-As-Usual (BAU) emission pathway against its allocated
+    carbon budget for a specified temperature scenario.
+    Displays a comparative projection plot and prints a detailed budget depletion analysis summary.
+
+    Args:
+        global_carbon_budget (pd.DataFrame): Allocated carbon budget data containing fair share values.
+        global_emission_population (pd.DataFrame): Global demographic data used to calculate individual fair allowances.
+        country_emission (pd.DataFrame): Historical annual emissions containing 'year' and 'emission'.
+        temperature (str): The specific temperature scenario being analyzed (e.g., '1.5' or '2.0').
+    """
+    # 1. Data Extraction & Preparation
+    deu_budget = global_carbon_budget[global_carbon_budget['country_code'] == 'DEU'].iloc[0]
+    fair_share_gt = deu_budget['fair_share']
+
+    emission_2023_row = country_emission[country_emission['year'] == 2023].iloc[0]
+    annual_emission_2023_gt = emission_2023_row['emission'] / 1e9
+
+    deu_pop_2024 = global_emission_population[(global_emission_population['country_code'] == 'DEU') & (global_emission_population['year'] == 2024)]['population'].values[0]
+
+    avg_annual_fair_national_gt = fair_share_gt / 27
+    individual_fair_allowance_total = (fair_share_gt * 1e9) / deu_pop_2024
+
+    years_left = fair_share_gt / annual_emission_2023_gt
+    depletion_date = 2023 + years_left
+
+    # Format years_left into years and months
+    left_y = int(years_left)
+    left_m = int(round((years_left - left_y) * 12))
+    if left_m == 12:
+        left_y += 1
+        left_m = 0
+
+    # Format depletion_date into Month of Year string
+    month_names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    depletion_y = int(depletion_date)
+    depletion_m_idx = min(int((depletion_date - depletion_y) * 12), 11)
+    depletion_month_str = f"{month_names[depletion_m_idx]} of {depletion_y}"
+
+    hist_years = country_emission['year'].values
+    hist_emissions = country_emission['emission'].values / 1e9
+
+    proj_years = np.arange(2024, 2041)
+    bau_emissions = np.full(len(proj_years), annual_emission_2023_gt)
+    fair_line = np.full(len(proj_years), avg_annual_fair_national_gt)
+
+    # 2. Plotting
+    FS = 12  # Base Font Size
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Professional Hex Color Palette
+    color_historical = '#2c3e50'  # Dark Slate Gray
+    color_bau = '#c0392b'         # Muted Dark Red
+    color_fairshare = '#27ae60'   # Muted Green
+
+    # Plot Lines with adjusted thickness
+    ax.plot(hist_years, hist_emissions, color=color_historical, linewidth=2.5, label='Historical Emissions (2000-2023)')
+    ax.plot(proj_years, bau_emissions, color=color_bau, linewidth=2.5, linestyle='--', label='BAU Projection (Keep 2023 Level)')
+    ax.plot(proj_years, fair_line, color=color_fairshare, linewidth=2.5, label='Fair Annual Budget (Average)')
+
+    # Shading the Gap
+    ax.fill_between(proj_years, fair_line, bau_emissions, color=color_bau, alpha=0.08)
+
+    # Draw a vertical line at the depletion date
+    ax.axvline(x=depletion_date, color='purple', linestyle=':', linewidth=1.5, zorder=0)
+
+    # Add text next to the vertical line
+    ax.text(depletion_date + 0.5, annual_emission_2023_gt + 0.2,
+            f'Budget Depleted\n{depletion_month_str}',
+            color='purple', fontsize=FS, fontweight='bold')
+
+    # Formatting & Labels
+    ax.set_title(f'Germany: Carbon Budget Analysis ({temperature}°C Scenario)', fontsize=FS+4, fontweight='bold', pad=15)
+    ax.set_xlabel('Year', fontsize=FS+1)
+
+    # Using Matplotlib's math text for CO2 subscript
+    ax.set_ylabel('Annual Emissions (GtCO$_2$)', fontsize=FS+1)
+
+    ax.set_xticks(np.arange(2000, 2041, 5))
+    ax.set_xlim(1999, 2040)
+    ax.set_ylim(0, max(hist_emissions) * 1.15)
+
+    ax.tick_params(axis='both', labelsize=FS)
+
+    # Add labels directly above the lines instead of a legend
+    # Adjust the +0.02 (Y offset) and X coordinates to fit perfectly
+    ax.text(2008, hist_emissions[10] + 0.05, 'Historical Emissions', color=color_historical, fontsize=FS, fontweight='bold')
+    ax.text(2025, bau_emissions[1] + 0.05, 'BAU Projection', color=color_bau, fontsize=FS, fontweight='bold')
+    ax.text(2025, fair_line[1] + 0.05, 'Fair Annual Budget', color=color_fairshare, fontsize=FS, fontweight='bold')
+
+    ax.spines['bottom'].set_linewidth(2.0)
+    ax.spines['bottom'].set_color('black')
+    ax.spines['left'].set_linewidth(2.0)
+    ax.spines['left'].set_color('black')
+
+    plt.show()
+
+    # 3. Summary Results
+    print("\n" + "="*60)
+    print(f"  ANALYSIS SUMMARY FOR GERMANY (DEU) | {temperature}°C SCENARIO")
+    print("="*60)
+    print(f"  ● Allocated Fair Share (2024-2050)      : {fair_share_gt:.2f} GtCO2")
+    print(f"  ● Current Annual Emission (2023)        : {annual_emission_2023_gt:.2f} GtCO2")
+    print(f"  ● Time left under BAU                   : {left_y} years {left_m} months")
+    print(f"  ● Actual Time (Depletion Date)          : {depletion_month_str}")
+    print(f"  ● Individual fair allowance             : {individual_fair_allowance_total:.2f} tCO2 per person (Total until 2050)")
+    print("="*60 + "\n")
+
+
+def analyze_german_netzero_pathway(global_carbon_budget_1_5C: pd.DataFrame,
                                   global_carbon_budget_2_0C: pd.DataFrame,
                                   country_emission: pd.DataFrame,
                                   emission_1990: float) -> None:
@@ -85,7 +198,7 @@ def analyze_german_policy_pathway(global_carbon_budget_1_5C: pd.DataFrame,
     ax.spines['left'].set_linewidth(2.0)
     ax.spines['left'].set_color('black')
 
-    ax.set_title('Germany: Committed Policy Pathway & Cumulative Emissions', fontsize=FS+4, fontweight='bold', pad=15)
+    ax.set_title('Germany: Committed Policy Emission Reduction Pathway', fontsize=FS+4, fontweight='bold', pad=15)
     ax.set_xlabel('Year', fontsize=FS+1)
     ax.set_ylabel('Annual Emissions (GtCO$_2$)', fontsize=FS+1)
 

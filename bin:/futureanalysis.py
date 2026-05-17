@@ -4,9 +4,9 @@ import numpy as np
 
 
 def analyze_german_bau_pathway(global_carbon_budget: pd.DataFrame,
-                                 global_emission_population: pd.DataFrame,
-                                 country_emission: pd.DataFrame,
-                                 temperature: str) -> None:
+                               global_emission_population: pd.DataFrame,
+                               country_emission: pd.DataFrame,
+                               temperature: str) -> None:
     """
     Evaluates Germany's Business-As-Usual (BAU) emission pathway against its allocated
     carbon budget for a specified temperature scenario.
@@ -117,9 +117,9 @@ def analyze_german_bau_pathway(global_carbon_budget: pd.DataFrame,
 
 
 def analyze_german_netzero_pathway(global_carbon_budget_1_5C: pd.DataFrame,
-                                  global_carbon_budget_2_0C: pd.DataFrame,
-                                  country_emission: pd.DataFrame,
-                                  emission_1990: float) -> None:
+                                   global_carbon_budget_2_0C: pd.DataFrame,
+                                   country_emission: pd.DataFrame,
+                                   emission_1990: float) -> None:
     """
     Evaluates Germany's committed climate policy pathway against its carbon debts
     and carbon budgets for both 1.5°C and 2.0°C scenarios.

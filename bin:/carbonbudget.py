@@ -1,5 +1,3 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 
@@ -91,4 +89,3 @@ def calculate_adjusted_carbon_budgets(merged_global: pd.DataFrame,
 
     # Return the final dataframe instead of printing
     return global_carbon_budget
-

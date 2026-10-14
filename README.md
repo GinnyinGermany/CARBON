@@ -4,6 +4,11 @@ A python based tool to load German greenhouse gas emissions data and global emis
 # Overview
 This repository contains the datasets, source code, and documentation required to perform the historical carbon debt and future budget analysis for Germany. The project is organized into modular components separating the core computational logic, raw data, and narrative analysis.
 
+Please directly see what I've done in this notebook! [📄 Read ](bin/Computational_Narrative.ipynb)
+
+[![Global carbon budget analysis](bin/carbon_debt_global.png)](bin/Computational_Narrative.ipynb)
+
+
 ### Directory Structure
 ```text
 .
